@@ -32,6 +32,8 @@ interface AnimatedButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButton
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
+  // Add asChild prop to support composition with other components
+  asChild?: boolean;
   // Add motion props separately
   initial?: any;
   animate?: any;
@@ -46,6 +48,7 @@ const AnimatedButton = ({
   variant = 'default',
   size = 'default',
   className,
+  asChild = false,
   initial = { opacity: 0, y: 10 },
   animate = { opacity: 1, y: 0 },
   whileHover = { scale: 1.03 },
@@ -72,6 +75,7 @@ const AnimatedButton = ({
         variant={variant}
         size={size}
         className={cn('font-medium', className)}
+        asChild={asChild}
         {...props}
       >
         {children}

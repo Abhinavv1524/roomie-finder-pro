@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import AuthWrapper from '@/components/AuthWrapper';
 import ProfileCreation from '@/components/ProfileCreation';
@@ -20,7 +19,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/store';
 
-// List of Indian locations
 const indianLocations = [
   "Mumbai, Maharashtra", 
   "Delhi, NCR", 
@@ -63,7 +61,6 @@ const SearchPage = () => {
   const [isPropertyDialogOpen, setIsPropertyDialogOpen] = useState(false);
   const [isContactFormOpen, setIsContactFormOpen] = useState(false);
   
-  // Show location dropdown
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [filteredLocations, setFilteredLocations] = useState(indianLocations);
   
@@ -144,7 +141,6 @@ const SearchPage = () => {
     
     addSavedProperty(savedProperty);
     
-    // Animation here (in real implementation)
     toast.success('Property saved to your favorites!', {
       description: 'You can view it in your saved properties section.'
     });
@@ -442,7 +438,7 @@ const SearchPage = () => {
                           alt={property.title} 
                           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                         />
-                        {property.virtualTour && (
+                        {property.virtualTourUrl && (
                           <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
                             Virtual Tour Available
                           </div>
@@ -518,7 +514,6 @@ const SearchPage = () => {
         </main>
       </div>
       
-      {/* Property Details Dialog */}
       <Dialog open={isPropertyDialogOpen} onOpenChange={setIsPropertyDialogOpen}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedProperty && (
@@ -546,7 +541,7 @@ const SearchPage = () => {
                       className="w-full h-full object-cover rounded-md"
                     />
                     
-                    {selectedProperty.virtualTour && (
+                    {selectedProperty.virtualTourUrl && (
                       <div className="absolute bottom-4 right-4">
                         <AnimatedButton size="sm">
                           View 3D Tour
