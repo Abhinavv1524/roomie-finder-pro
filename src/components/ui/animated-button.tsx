@@ -14,7 +14,20 @@ type MotionProps = {
   variants?: any;
 };
 
-interface AnimatedButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof MotionProps> {
+// Define drag-related event handler props that cause conflicts
+type DragHandlerProps = {
+  onDrag?: any;
+  onDragStart?: any;
+  onDragEnd?: any;
+  onDragEnter?: any;
+  onDragLeave?: any;
+  onDragOver?: any;
+  onDrop?: any;
+  onAnimationStart?: any;
+  onAnimationComplete?: any;
+};
+
+interface AnimatedButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof MotionProps | keyof DragHandlerProps> {
   children: React.ReactNode;
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
