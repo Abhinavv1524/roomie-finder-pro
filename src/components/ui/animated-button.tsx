@@ -41,8 +41,8 @@ const AnimatedButton = ({
     transition
   };
   
-  // Filter out any onDrag handlers from the remaining props - these are for Button, not motion.div
-  const { onDrag, ...filteredProps } = props;
+  // Filter out all drag-related handlers from the remaining props
+  const { onDrag, onDragStart, onDragEnd, onDragEnter, onDragLeave, onDragOver, onDrop, ...filteredProps } = props;
   
   return (
     <motion.div

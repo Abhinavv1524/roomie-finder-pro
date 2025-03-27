@@ -32,8 +32,8 @@ const GlassCard = ({
     transition
   };
   
-  // Filter out any onDrag handlers from the remaining props
-  const { onDrag, ...filteredProps } = props;
+  // Filter out all drag-related handlers from the remaining props
+  const { onDrag, onDragStart, onDragEnd, onDragEnter, onDragLeave, onDragOver, onDrop, ...filteredProps } = props;
   
   return (
     <motion.div
