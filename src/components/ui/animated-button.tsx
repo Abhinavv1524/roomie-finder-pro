@@ -1,19 +1,23 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-  className?: string;
+// Separate motion-specific props from HTML props
+type MotionProps = {
   initial?: any;
   animate?: any;
   whileHover?: any;
   whileTap?: any;
   transition?: any;
+};
+
+interface AnimatedButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof MotionProps>, MotionProps {
+  children: React.ReactNode;
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  className?: string;
 }
 
 const AnimatedButton = ({
@@ -28,13 +32,18 @@ const AnimatedButton = ({
   transition = { duration: 0.2 },
   ...props
 }: AnimatedButtonProps) => {
+  // Extract motion props to avoid type conflicts
+  const motionProps: HTMLMotionProps<"div"> = {
+    initial,
+    animate,
+    whileHover,
+    whileTap,
+    transition
+  };
+  
   return (
     <motion.div
-      initial={initial}
-      animate={animate}
-      whileHover={whileHover}
-      whileTap={whileTap}
-      transition={transition}
+      {...motionProps}
     >
       <Button
         variant={variant}
