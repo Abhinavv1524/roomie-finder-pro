@@ -41,6 +41,9 @@ const AnimatedButton = ({
     transition
   };
   
+  // Filter out any onDrag handlers from the remaining props - these are for Button, not motion.div
+  const { onDrag, ...filteredProps } = props;
+  
   return (
     <motion.div
       {...motionProps}
@@ -49,7 +52,7 @@ const AnimatedButton = ({
         variant={variant}
         size={size}
         className={cn('font-medium', className)}
-        {...props}
+        {...filteredProps}
       >
         {children}
       </Button>

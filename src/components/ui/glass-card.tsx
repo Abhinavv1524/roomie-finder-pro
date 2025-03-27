@@ -32,6 +32,9 @@ const GlassCard = ({
     transition
   };
   
+  // Filter out any onDrag handlers from the remaining props
+  const { onDrag, ...filteredProps } = props;
+  
   return (
     <motion.div
       className={cn(
@@ -40,7 +43,7 @@ const GlassCard = ({
         className
       )}
       {...motionProps}
-      {...props}
+      {...filteredProps}
     >
       {children}
     </motion.div>
