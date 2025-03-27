@@ -1,27 +1,48 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { GlassCard } from '@/components/ui/glass-card';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { Home, Users, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { sampleRoommates, sampleProperties, RoommateProfile, Property } from '@/lib/data';
+import RoommateQuestionnaire from './RoommateQuestionnaire';
+import RoomQuestionnaire from './RoomQuestionnaire';
+import RoommateCard from './RoommateCard';
+import PropertyCard from './PropertyCard';
+import { calculateCompatibility } from '@/lib/compatibility';
 
 const ExploreSection = () => {
-  const { exploreMode, setExploreMode, roomPreference, setRoomPreference } = useAppStore();
+  const { 
+    exploreMode, 
+    setExploreMode, 
+    roomPreference, 
+    setRoomPreference,
+    userProfile 
+  } = useAppStore();
+  
   const [animate, setAnimate] = useState(false);
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const [currentRoommateIndex, setCurrentRoommateIndex] = useState(0);
+  const [currentPropertyIndex, setCurrentPropertyIndex] = useState(0);
+  const [filteredRoommates, setFilteredRoommates] = useState<RoommateProfile[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [roommatePreferences, setRoommatePreferences] = useState<Record<string, string>>({});
+  const [roomPreferences, setRoomPreferences] = useState<Record<string, any>>({});
 
   const handleSelectMode = (mode: 'roommate' | 'room') => {
     setAnimate(true);
     setTimeout(() => {
       setExploreMode(mode);
       setAnimate(false);
+      setShowQuestionnaire(true);
     }, 300);
   };
 
   const handleSelectRoomType = (type: 'shared' | 'private') => {
     setRoomPreference(type);
-    toast.success(`You've selected a ${type} room. We'll show you available listings.`);
+    setShowQuestionnaire(true);
   };
 
   const handleReset = () => {
@@ -29,8 +50,133 @@ const ExploreSection = () => {
     setTimeout(() => {
       setExploreMode(null);
       setRoomPreference(null);
+      setShowQuestionnaire(false);
       setAnimate(false);
+      setCurrentRoommateIndex(0);
+      setCurrentPropertyIndex(0);
+      setFilteredRoommates([]);
+      setFilteredProperties([]);
     }, 300);
+  };
+
+  const handleRoommateQuestionnaireComplete = (preferences: Record<string, string>) => {
+    setRoommatePreferences(preferences);
+    setShowQuestionnaire(false);
+    
+    // Filter and sort roommates based on preferences
+    let filtered = [...sampleRoommates];
+    
+    // Filter by age if specified
+    if (preferences.age_preference && preferences.age_preference !== 'any') {
+      const [minAge, maxAge] = preferences.age_preference.split('-').map(Number);
+      filtered = filtered.filter(roommate => 
+        roommate.age >= minAge && roommate.age <= maxAge
+      );
+    }
+    
+    // Filter by gender if specified
+    if (preferences.gender_preference && preferences.gender_preference !== 'any') {
+      filtered = filtered.filter(roommate => 
+        roommate.gender.toLowerCase() === preferences.gender_preference
+      );
+    }
+    
+    // Filter by occupation if specified
+    if (preferences.occupation && preferences.occupation !== 'any') {
+      filtered = filtered.filter(roommate => {
+        const occupation = roommate.occupation.toLowerCase();
+        if (preferences.occupation === 'student') {
+          return occupation.includes('student');
+        } else if (preferences.occupation === 'professional') {
+          return occupation.includes('professional') || 
+                 occupation.includes('manager') || 
+                 occupation.includes('engineer');
+        } else if (preferences.occupation === 'remote') {
+          return occupation.includes('remote') || occupation.includes('freelance');
+        }
+        return true;
+      });
+    }
+    
+    // Calculate compatibility scores if user profile exists
+    if (userProfile) {
+      filtered.forEach(roommate => {
+        const score = calculateCompatibility(userProfile, roommate);
+        roommate.compatibilityScores[userProfile.userId] = score;
+      });
+      
+      // Sort by compatibility score
+      filtered.sort((a, b) => 
+        (b.compatibilityScores[userProfile.userId] || 0) - 
+        (a.compatibilityScores[userProfile.userId] || 0)
+      );
+    }
+    
+    setFilteredRoommates(filtered.length > 0 ? filtered : sampleRoommates);
+    toast.success(`Found ${filtered.length} potential roommates based on your preferences!`);
+  };
+
+  const handleRoomQuestionnaireComplete = (preferences: Record<string, any>) => {
+    setRoomPreferences(preferences);
+    setShowQuestionnaire(false);
+    
+    // Filter properties based on preferences and room type
+    let filtered = [...sampleProperties];
+    
+    // Filter by room type
+    if (roomPreference) {
+      filtered = filtered.filter(property => property.roomType === roomPreference);
+    }
+    
+    // Filter by budget if specified
+    if (preferences.budget) {
+      const [minBudget, maxBudget] = preferences.budget.split('-').map(str => 
+        parseInt(str.replace(/\D/g, ''))
+      );
+      filtered = filtered.filter(property => 
+        property.price >= minBudget && property.price <= maxBudget
+      );
+    }
+    
+    // Filter by amenities if specified
+    if (preferences.amenities && preferences.amenities.length > 0) {
+      filtered = filtered.filter(property => 
+        preferences.amenities.some((amenity: string) => 
+          property.amenities.map(a => a.toLowerCase()).includes(amenity.toLowerCase())
+        )
+      );
+    }
+    
+    // Filter by location if specified
+    if (preferences.location && preferences.location.trim() !== '') {
+      const locationSearch = preferences.location.toLowerCase();
+      filtered = filtered.filter(property => 
+        property.location.toLowerCase().includes(locationSearch)
+      );
+    }
+    
+    setFilteredProperties(filtered.length > 0 ? filtered : sampleProperties.filter(p => p.roomType === roomPreference));
+    toast.success(`Found ${filtered.length} available ${roomPreference} rooms matching your criteria!`);
+  };
+
+  const handleRoommateAction = (action: 'like' | 'pass', roommate: RoommateProfile) => {
+    // Move to the next roommate
+    if (currentRoommateIndex < filteredRoommates.length - 1) {
+      setCurrentRoommateIndex(prev => prev + 1);
+    } else {
+      toast.info("You've gone through all potential roommates! Start over or adjust your search.");
+      setCurrentRoommateIndex(0);
+    }
+  };
+
+  const handlePropertyAction = (action: 'like' | 'pass', property: Property) => {
+    // Move to the next property
+    if (currentPropertyIndex < filteredProperties.length - 1) {
+      setCurrentPropertyIndex(prev => prev + 1);
+    } else {
+      toast.info("You've gone through all available rooms! Start over or adjust your search.");
+      setCurrentPropertyIndex(0);
+    }
   };
 
   return (
@@ -164,7 +310,18 @@ const ExploreSection = () => {
             </div>
           </GlassCard>
         </motion.div>
-      ) : exploreMode === 'room' && roomPreference ? (
+      ) : exploreMode === 'room' && roomPreference && showQuestionnaire ? (
+        <motion.div
+          key="room-questionnaire"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-2xl mx-auto"
+        >
+          <RoomQuestionnaire onComplete={handleRoomQuestionnaireComplete} />
+        </motion.div>
+      ) : exploreMode === 'room' && roomPreference && !showQuestionnaire ? (
         <motion.div
           key="room-results"
           initial={{ opacity: 0, y: 20 }}
@@ -173,7 +330,7 @@ const ExploreSection = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-2xl mx-auto"
         >
-          <GlassCard>
+          <GlassCard className="mb-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-medium">Available {roomPreference} Rooms</h2>
               <AnimatedButton
@@ -185,17 +342,41 @@ const ExploreSection = () => {
               </AnimatedButton>
             </div>
             
-            <p className="text-muted-foreground mb-6">
-              These are rooms matching your preferences. Swipe left to dismiss or right to save.
+            <p className="text-muted-foreground mb-4">
+              These rooms match your preferences. Swipe or use the buttons to navigate.
             </p>
             
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Room listings will appear here</p>
-              <p className="mt-2 text-sm">We're working on loading properties that match your needs</p>
-            </div>
+            {filteredProperties.length > 0 ? (
+              <div className="text-sm text-muted-foreground mb-4">
+                Showing {currentPropertyIndex + 1} of {filteredProperties.length} results
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No rooms found matching your criteria</p>
+                <p className="mt-2 text-sm">Try adjusting your preferences</p>
+              </div>
+            )}
           </GlassCard>
+          
+          {filteredProperties.length > 0 && (
+            <PropertyCard 
+              property={filteredProperties[currentPropertyIndex]} 
+              onAction={handlePropertyAction}
+            />
+          )}
         </motion.div>
-      ) : exploreMode === 'roommate' ? (
+      ) : exploreMode === 'roommate' && showQuestionnaire ? (
+        <motion.div
+          key="roommate-questionnaire"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-2xl mx-auto"
+        >
+          <RoommateQuestionnaire onComplete={handleRoommateQuestionnaireComplete} />
+        </motion.div>
+      ) : exploreMode === 'roommate' && !showQuestionnaire ? (
         <motion.div
           key="roommate-results"
           initial={{ opacity: 0, y: 20 }}
@@ -204,7 +385,7 @@ const ExploreSection = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-2xl mx-auto"
         >
-          <GlassCard>
+          <GlassCard className="mb-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-medium">Potential Roommates</h2>
               <AnimatedButton
@@ -216,15 +397,28 @@ const ExploreSection = () => {
               </AnimatedButton>
             </div>
             
-            <p className="text-muted-foreground mb-6">
-              These are people who match your compatibility preferences. Swipe left to pass or right to connect.
+            <p className="text-muted-foreground mb-4">
+              These people match your compatibility preferences. Swipe or use the buttons to navigate.
             </p>
             
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Roommate profiles will appear here</p>
-              <p className="mt-2 text-sm">We're working on finding compatible matches for you</p>
-            </div>
+            {filteredRoommates.length > 0 ? (
+              <div className="text-sm text-muted-foreground mb-4">
+                Showing {currentRoommateIndex + 1} of {filteredRoommates.length} results
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No roommates found matching your criteria</p>
+                <p className="mt-2 text-sm">Try adjusting your preferences</p>
+              </div>
+            )}
           </GlassCard>
+          
+          {filteredRoommates.length > 0 && (
+            <RoommateCard 
+              roommate={filteredRoommates[currentRoommateIndex]} 
+              onAction={handleRoommateAction}
+            />
+          )}
         </motion.div>
       ) : null}
     </AnimatePresence>
