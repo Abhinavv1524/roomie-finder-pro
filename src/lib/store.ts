@@ -58,9 +58,9 @@ interface AppState {
 
 const initialSearchFilters = {
   location: '',
-  budget: [500, 2000],
+  budget: [500, 2000] as [number, number],
   roomType: 'any',
-  amenities: [],
+  amenities: [] as string[],
 };
 
 export const useAppStore = create<AppState>()(

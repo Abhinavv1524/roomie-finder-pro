@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const CardVariants = {
@@ -29,12 +29,14 @@ const CardVariants = {
   }
 };
 
+interface CardMotionProps extends Omit<HTMLMotionProps<"div">, "initial" | "animate" | "whileHover" | "whileTap"> {
+  interactive?: boolean;
+  delay?: number;
+}
+
 const CardMotion = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
-    interactive?: boolean;
-    delay?: number;
-  }
+  CardMotionProps
 >(({ className, interactive = true, delay = 0, ...props }, ref) => (
   <motion.div
     ref={ref}

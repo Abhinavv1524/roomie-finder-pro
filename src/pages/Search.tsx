@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import AuthWrapper from '@/components/AuthWrapper';
 import ProfileCreation from '@/components/ProfileCreation';
@@ -11,9 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Search as SearchIcon, MapPin, Home, Wifi, Coffee, Train, School, Building, X } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Home, Wifi, Coffee, Train, School, Building, X, Users } from 'lucide-react';
 import { sampleProperties } from '@/lib/data';
-import { CardMotion, CardMotionContent, CardMotionDescription, CardMotionHeader, CardMotionTitle } from '@/components/ui/card-motion';
+import { CardMotion, CardMotionContent, CardMotionDescription, CardMotionHeader, CardMotionTitle, CardMotionFooter } from '@/components/ui/card-motion';
 
 const SearchPage = () => {
   const navigate = useNavigate();
@@ -25,7 +24,6 @@ const SearchPage = () => {
   const [searchResults, setSearchResults] = useState(sampleProperties);
 
   const handleSearch = () => {
-    // Filter properties based on search criteria
     const filteredResults = sampleProperties.filter((property) => {
       const locationMatch = location === '' || property.location.toLowerCase().includes(location.toLowerCase());
       const budgetMatch = property.price >= budget[0] && property.price <= budget[1];

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { motion, VariantLabels, TargetAndTransition, AnimationControls } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -9,11 +9,11 @@ interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
-  initial?: object;
-  animate?: object;
-  whileHover?: object;
-  whileTap?: object;
-  transition?: object;
+  initial?: VariantLabels | TargetAndTransition;
+  animate?: VariantLabels | TargetAndTransition | AnimationControls;
+  whileHover?: VariantLabels | TargetAndTransition;
+  whileTap?: VariantLabels | TargetAndTransition;
+  transition?: any; // Using any for transition as it has complex typings
 }
 
 const AnimatedButton = ({
