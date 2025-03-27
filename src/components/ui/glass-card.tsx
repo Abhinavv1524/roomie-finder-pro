@@ -8,12 +8,22 @@ type MotionProps = {
   initial?: any;
   animate?: any;
   transition?: any;
+  whileHover?: any;
+  whileTap?: any;
+  variants?: any;
 };
 
-interface GlassCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, keyof MotionProps>, MotionProps {
+interface GlassCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, keyof MotionProps> {
   children: React.ReactNode;
   className?: string;
   hoverEffect?: boolean;
+  // Add motion props separately
+  initial?: any;
+  animate?: any;
+  transition?: any;
+  whileHover?: any;
+  whileTap?: any;
+  variants?: any;
 }
 
 const GlassCard = ({ 
@@ -23,17 +33,20 @@ const GlassCard = ({
   initial = { opacity: 0, y: 20 },
   animate = { opacity: 1, y: 0 },
   transition = { duration: 0.5 },
+  whileHover,
+  whileTap,
+  variants,
   ...props 
 }: GlassCardProps) => {
-  // Extract motion props to avoid passing them as HTML attributes
+  // Create a clean object with only motion props
   const motionProps: HTMLMotionProps<"div"> = {
     initial,
     animate,
-    transition
+    transition,
+    ...(whileHover && { whileHover }),
+    ...(whileTap && { whileTap }),
+    ...(variants && { variants })
   };
-  
-  // Filter out all drag-related handlers from the remaining props
-  const { onDrag, onDragStart, onDragEnd, onDragEnter, onDragLeave, onDragOver, onDrop, ...filteredProps } = props;
   
   return (
     <motion.div
@@ -43,7 +56,7 @@ const GlassCard = ({
         className
       )}
       {...motionProps}
-      {...filteredProps}
+      {...props}
     >
       {children}
     </motion.div>

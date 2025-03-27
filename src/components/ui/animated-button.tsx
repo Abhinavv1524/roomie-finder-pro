@@ -11,13 +11,21 @@ type MotionProps = {
   whileHover?: any;
   whileTap?: any;
   transition?: any;
+  variants?: any;
 };
 
-interface AnimatedButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof MotionProps>, MotionProps {
+interface AnimatedButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof MotionProps> {
   children: React.ReactNode;
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
+  // Add motion props separately
+  initial?: any;
+  animate?: any;
+  whileHover?: any;
+  whileTap?: any;
+  transition?: any;
+  variants?: any;
 }
 
 const AnimatedButton = ({
@@ -30,19 +38,18 @@ const AnimatedButton = ({
   whileHover = { scale: 1.03 },
   whileTap = { scale: 0.97 },
   transition = { duration: 0.2 },
+  variants,
   ...props
 }: AnimatedButtonProps) => {
-  // Extract motion props to avoid type conflicts
+  // Create a clean object with only motion props
   const motionProps: HTMLMotionProps<"div"> = {
     initial,
     animate,
     whileHover,
     whileTap,
-    transition
+    transition,
+    ...(variants && { variants })
   };
-  
-  // Filter out all drag-related handlers from the remaining props
-  const { onDrag, onDragStart, onDragEnd, onDragEnter, onDragLeave, onDragOver, onDrop, ...filteredProps } = props;
   
   return (
     <motion.div
@@ -52,7 +59,7 @@ const AnimatedButton = ({
         variant={variant}
         size={size}
         className={cn('font-medium', className)}
-        {...filteredProps}
+        {...props}
       >
         {children}
       </Button>
