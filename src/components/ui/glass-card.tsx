@@ -1,15 +1,15 @@
 
 import React from 'react';
-import { motion, VariantLabels, TargetAndTransition, AnimationControls } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
   hoverEffect?: boolean;
-  initial?: VariantLabels | TargetAndTransition;
-  animate?: VariantLabels | TargetAndTransition | AnimationControls;
-  transition?: any; // Using any for transition as it has complex typings
+  initial?: any;
+  animate?: any;
+  transition?: any;
 }
 
 const GlassCard = ({ 
