@@ -40,11 +40,31 @@ const questions = [
     ],
   },
   {
+    id: 'food_preference',
+    question: 'What food preference do you have?',
+    options: [
+      { value: 'vegetarian', label: 'Vegetarian' },
+      { value: 'non_vegetarian', label: 'Non-vegetarian' },
+      { value: 'vegan', label: 'Vegan' },
+      { value: 'any', label: 'No preference' },
+    ],
+  },
+  {
     id: 'smoking',
     question: 'What is your preference regarding smoking?',
     options: [
       { value: 'non_smoker', label: 'Non-smoker only' },
       { value: 'outside', label: 'Smoking outside acceptable' },
+      { value: 'any', label: 'No preference' },
+    ],
+  },
+  {
+    id: 'hometown_preference',
+    question: 'Any preference regarding hometown?',
+    options: [
+      { value: 'same_state', label: 'Same state as mine' },
+      { value: 'north_india', label: 'North Indian' },
+      { value: 'south_india', label: 'South Indian' },
       { value: 'any', label: 'No preference' },
     ],
   },

@@ -5,7 +5,7 @@ import { AnimatedButton } from '@/components/ui/animated-button';
 import { motion } from 'framer-motion';
 import { RoommateProfile } from '@/lib/data';
 import { useAppStore } from '@/lib/store';
-import { Heart, X, MessageCircle, User, Home, Briefcase, DollarSign } from 'lucide-react';
+import { Heart, X, MessageCircle, User, Home, Briefcase, DollarSign, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { getCompatibilityColor, getCompatibilityDescription } from '@/lib/compatibility';
 
@@ -15,7 +15,14 @@ interface RoommateCardProps {
 }
 
 const RoommateCard = ({ roommate, onAction }: RoommateCardProps) => {
-  const { userProfile } = useAppStore();
+  const { 
+    userProfile, 
+    savedRoommates, 
+    addSavedRoommate, 
+    addSavedContact, 
+    setMessagingOpen,
+    setActiveContactId
+  } = useAppStore();
   const [flipped, setFlipped] = useState(false);
   
   const compatibilityScore = userProfile && roommate.compatibilityScores[userProfile.userId] 
@@ -24,6 +31,7 @@ const RoommateCard = ({ roommate, onAction }: RoommateCardProps) => {
   
   const compatibilityColor = getCompatibilityColor(compatibilityScore);
   const compatibilityText = getCompatibilityDescription(compatibilityScore);
+  const isLiked = savedRoommates.includes(roommate.id);
   
   const handleFlip = () => {
     setFlipped(!flipped);
@@ -31,8 +39,26 @@ const RoommateCard = ({ roommate, onAction }: RoommateCardProps) => {
   
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (!isLiked) {
+      addSavedRoommate(roommate.id);
+      
+      // Also add to contacts for messaging
+      addSavedContact({
+        id: roommate.id,
+        name: roommate.name,
+        avatar: roommate.avatar,
+        lastMessage: "Hi there! I'm interested in connecting as potential roommates.",
+        lastMessageTime: new Date(),
+        unreadCount: 0,
+        online: Math.random() > 0.5,
+        type: 'roommate'
+      });
+      
+      toast.success(`You've liked ${roommate.name}. We'll notify you if they match with you!`);
+    }
+    
     onAction('like', roommate);
-    toast.success(`You've liked ${roommate.name}. We'll notify you if they match with you!`);
   };
   
   const handlePass = (e: React.MouseEvent) => {
@@ -42,7 +68,25 @@ const RoommateCard = ({ roommate, onAction }: RoommateCardProps) => {
   
   const handleMessage = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toast.info(`This would start a conversation with ${roommate.name}`);
+    
+    // Add to contacts if not already saved
+    if (!savedRoommates.includes(roommate.id)) {
+      addSavedRoommate(roommate.id);
+      addSavedContact({
+        id: roommate.id,
+        name: roommate.name,
+        avatar: roommate.avatar,
+        lastMessage: "Hi there! I'm interested in connecting as potential roommates.",
+        lastMessageTime: new Date(),
+        unreadCount: 0,
+        online: Math.random() > 0.5,
+        type: 'roommate'
+      });
+    }
+    
+    // Open messaging with this contact
+    setActiveContactId(roommate.id);
+    setMessagingOpen(true);
   };
 
   return (
@@ -71,6 +115,14 @@ const RoommateCard = ({ roommate, onAction }: RoommateCardProps) => {
                   </div>
                 </div>
                 
+                {isLiked && (
+                  <div className="absolute top-2 left-2 z-10">
+                    <div className="px-3 py-1 rounded-full bg-green-500/90 text-white text-sm font-medium flex items-center gap-1">
+                      <Check className="h-4 w-4" /> Matched
+                    </div>
+                  </div>
+                )}
+                
                 <div className="mb-4 rounded-lg overflow-hidden h-64 bg-gray-100">
                   <img 
                     src={roommate.avatar} 
@@ -94,7 +146,7 @@ const RoommateCard = ({ roommate, onAction }: RoommateCardProps) => {
                   <span>{roommate.location}</span>
                   
                   <DollarSign className="h-4 w-4 ml-3" />
-                  <span>${roommate.budget}/month</span>
+                  <span>₹{roommate.budget.toLocaleString()}/month</span>
                 </div>
                 
                 <p className="text-sm line-clamp-2 mb-4">{roommate.bio}</p>
@@ -111,8 +163,10 @@ const RoommateCard = ({ roommate, onAction }: RoommateCardProps) => {
                   <AnimatedButton
                     onClick={handleLike}
                     className="flex-1"
+                    variant={isLiked ? "outline" : "default"}
                   >
-                    <Heart className="mr-1" /> Like
+                    <Heart className={`mr-1 ${isLiked ? "fill-primary" : ""}`} /> 
+                    {isLiked ? 'Liked' : 'Like'}
                   </AnimatedButton>
                 </div>
               </div>

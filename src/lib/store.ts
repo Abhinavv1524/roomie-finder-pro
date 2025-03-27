@@ -33,6 +33,26 @@ export type UserProfile = {
   };
 };
 
+export type SavedContact = {
+  id: string;
+  name: string;
+  avatar: string;
+  lastMessage?: string;
+  lastMessageTime?: Date;
+  unreadCount?: number;
+  online?: boolean;
+  type: 'roommate' | 'propertyOwner';
+};
+
+export type SavedProperty = {
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  imageUrl: string;
+  savedAt: Date;
+};
+
 interface AppState {
   userProfile: UserProfile | null;
   setUserProfile: (profile: UserProfile) => void;
@@ -54,11 +74,29 @@ interface AppState {
   setExploreMode: (mode: 'roommate' | 'room' | null) => void;
   roomPreference: 'shared' | 'private' | null;
   setRoomPreference: (preference: 'shared' | 'private' | null) => void;
+  // New state for saved items and messaging
+  savedRoommates: string[];
+  savedProperties: SavedProperty[];
+  savedContacts: SavedContact[];
+  addSavedRoommate: (roommateId: string) => void;
+  removeSavedRoommate: (roommateId: string) => void;
+  addSavedProperty: (property: SavedProperty) => void;
+  removeSavedProperty: (propertyId: string) => void;
+  addSavedContact: (contact: SavedContact) => void;
+  removeSavedContact: (contactId: string) => void;
+  isMessagingOpen: boolean;
+  setMessagingOpen: (isOpen: boolean) => void;
+  activeContactId: string | null;
+  setActiveContactId: (contactId: string | null) => void;
+  isPaymentModalOpen: boolean;
+  setPaymentModalOpen: (isOpen: boolean) => void;
+  selectedPropertyForPayment: string | null;
+  setSelectedPropertyForPayment: (propertyId: string | null) => void;
 }
 
 const initialSearchFilters = {
   location: '',
-  budget: [500, 2000] as [number, number],
+  budget: [5000, 50000] as [number, number],
   roomType: 'any',
   amenities: [] as string[],
 };
@@ -89,9 +127,45 @@ export const useAppStore = create<AppState>()(
       setExploreMode: (mode) => set({ exploreMode: mode }),
       roomPreference: null,
       setRoomPreference: (preference) => set({ roomPreference: preference }),
+      // Initialize new state
+      savedRoommates: [],
+      savedProperties: [],
+      savedContacts: [],
+      addSavedRoommate: (roommateId) => 
+        set((state) => ({
+          savedRoommates: [...state.savedRoommates, roommateId]
+        })),
+      removeSavedRoommate: (roommateId) => 
+        set((state) => ({
+          savedRoommates: state.savedRoommates.filter(id => id !== roommateId)
+        })),
+      addSavedProperty: (property) => 
+        set((state) => ({
+          savedProperties: [...state.savedProperties, property]
+        })),
+      removeSavedProperty: (propertyId) => 
+        set((state) => ({
+          savedProperties: state.savedProperties.filter(property => property.id !== propertyId)
+        })),
+      addSavedContact: (contact) => 
+        set((state) => ({
+          savedContacts: [...state.savedContacts, contact]
+        })),
+      removeSavedContact: (contactId) => 
+        set((state) => ({
+          savedContacts: state.savedContacts.filter(contact => contact.id !== contactId)
+        })),
+      isMessagingOpen: false,
+      setMessagingOpen: (isOpen) => set({ isMessagingOpen: isOpen }),
+      activeContactId: null,
+      setActiveContactId: (contactId) => set({ activeContactId: contactId }),
+      isPaymentModalOpen: false,
+      setPaymentModalOpen: (isOpen) => set({ isPaymentModalOpen: isOpen }),
+      selectedPropertyForPayment: null,
+      setSelectedPropertyForPayment: (propertyId) => set({ selectedPropertyForPayment: propertyId }),
     }),
     {
-      name: 'roomie-finder-storage',
+      name: 'findmynest-storage',
     }
   )
 );

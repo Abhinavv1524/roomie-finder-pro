@@ -4,9 +4,11 @@ import { GlassCard } from '@/components/ui/glass-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { motion } from 'framer-motion';
 import { Property } from '@/lib/data';
-import { Home, MapPin, DollarSign, Check, X, Heart, CalendarDays, ExternalLink } from 'lucide-react';
+import { useAppStore } from '@/lib/store';
+import { Home, MapPin, Check, X, Heart, CalendarDays, ExternalLink, MessageCircle, CreditCard } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { SavedProperty } from '@/lib/store';
 
 interface PropertyCardProps {
   property: Property;
@@ -14,7 +16,18 @@ interface PropertyCardProps {
 }
 
 const PropertyCard = ({ property, onAction }: PropertyCardProps) => {
+  const { 
+    savedProperties, 
+    addSavedProperty, 
+    addSavedContact,
+    setMessagingOpen,
+    setActiveContactId,
+    setPaymentModalOpen,
+    setSelectedPropertyForPayment
+  } = useAppStore();
   const [flipped, setFlipped] = useState(false);
+  
+  const isLiked = savedProperties.some(p => p.id === property.id);
   
   const handleFlip = () => {
     setFlipped(!flipped);
@@ -22,8 +35,23 @@ const PropertyCard = ({ property, onAction }: PropertyCardProps) => {
   
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (!isLiked) {
+      const savedProperty: SavedProperty = {
+        id: property.id,
+        title: property.title,
+        location: property.location,
+        price: property.price,
+        imageUrl: property.imageUrl,
+        savedAt: new Date()
+      };
+      
+      addSavedProperty(savedProperty);
+      
+      toast.success(`You've saved ${property.title} to your favorites!`);
+    }
+    
     onAction('like', property);
-    toast.success(`You've saved ${property.title} to your favorites!`);
   };
   
   const handlePass = (e: React.MouseEvent) => {
@@ -33,7 +61,24 @@ const PropertyCard = ({ property, onAction }: PropertyCardProps) => {
   
   const handleContact = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toast.info(`Contacting owner at ${property.ownerContact}`);
+    
+    // Add property owner to contacts if not already
+    const contactId = `owner-${property.id}`;
+    
+    addSavedContact({
+      id: contactId,
+      name: `Owner of ${property.title.slice(0, 20)}...`,
+      avatar: "https://randomuser.me/api/portraits/men/85.jpg", // Default avatar
+      lastMessage: "Hi, I'm interested in your property. Is it still available?",
+      lastMessageTime: new Date(),
+      unreadCount: 0,
+      online: Math.random() > 0.5, // Random online status for demo
+      type: 'propertyOwner'
+    });
+    
+    // Open messaging with this contact
+    setActiveContactId(contactId);
+    setMessagingOpen(true);
   };
   
   const handleVirtualTour = (e: React.MouseEvent) => {
@@ -44,6 +89,12 @@ const PropertyCard = ({ property, onAction }: PropertyCardProps) => {
     } else {
       toast.error('Virtual tour not available for this property');
     }
+  };
+  
+  const handlePayment = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedPropertyForPayment(property.id);
+    setPaymentModalOpen(true);
   };
 
   return (
@@ -72,6 +123,14 @@ const PropertyCard = ({ property, onAction }: PropertyCardProps) => {
                   </Badge>
                 </div>
                 
+                {isLiked && (
+                  <div className="absolute top-2 left-2 z-10">
+                    <Badge variant="outline" className="bg-green-500/90 text-white border-0 flex items-center gap-1">
+                      <Check className="h-3 w-3" /> Saved
+                    </Badge>
+                  </div>
+                )}
+                
                 <div className="mb-4 rounded-lg overflow-hidden h-48 bg-gray-100">
                   <img 
                     src={property.imageUrl} 
@@ -88,8 +147,7 @@ const PropertyCard = ({ property, onAction }: PropertyCardProps) => {
                 </div>
                 
                 <div className="flex items-center gap-2 mt-1 mb-3">
-                  <DollarSign className="h-5 w-5 text-primary" />
-                  <span className="text-lg font-medium">${property.price}</span>
+                  <span className="text-lg font-medium">₹{property.price.toLocaleString()}</span>
                   <span className="text-sm text-muted-foreground">/month</span>
                 </div>
                 
@@ -119,9 +177,11 @@ const PropertyCard = ({ property, onAction }: PropertyCardProps) => {
                   
                   <AnimatedButton
                     onClick={handleLike}
+                    variant={isLiked ? "outline" : "default"}
                     className="flex-1"
                   >
-                    <Heart className="mr-1" /> Save
+                    <Heart className={`mr-1 ${isLiked ? "fill-primary" : ""}`} /> 
+                    {isLiked ? 'Saved' : 'Save'}
                   </AnimatedButton>
                 </div>
               </div>
@@ -182,6 +242,15 @@ const PropertyCard = ({ property, onAction }: PropertyCardProps) => {
                 </AnimatedButton>
                 
                 <AnimatedButton
+                  onClick={handlePayment}
+                  variant="outline"
+                  className="w-full justify-start"
+                >
+                  <CreditCard className="mr-2" /> 
+                  Pay Security Deposit
+                </AnimatedButton>
+                
+                <AnimatedButton
                   onClick={handleContact}
                   variant="outline"
                   className="w-full justify-start"
@@ -207,7 +276,7 @@ const PropertyCard = ({ property, onAction }: PropertyCardProps) => {
                   onClick={handleContact}
                   className="flex-1"
                 >
-                  Contact Owner
+                  <MessageCircle className="mr-1" /> Message Owner
                 </AnimatedButton>
               </div>
             </GlassCard>

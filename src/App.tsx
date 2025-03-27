@@ -12,6 +12,9 @@ import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
+// Set the document title
+document.title = "FindMyNest - Find Your Perfect Home & Roommate";
+
 const queryClient = new QueryClient();
 
 const App = () => (
