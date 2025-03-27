@@ -11,12 +11,16 @@ import { toast } from 'sonner';
 import Logo from '@/components/Logo';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { userProfile, updateUserProfile } = useAppStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [isPreferencesDialogOpen, setIsPreferencesDialogOpen] = useState(false);
+  
   const [formData, setFormData] = useState({
     age: userProfile?.profileData?.age?.toString() || '',
     gender: userProfile?.profileData?.gender || '',
@@ -25,10 +29,27 @@ const Profile = () => {
     location: userProfile?.profileData?.location || '',
     phone: userProfile?.profileData?.phone || '',
   });
+  
+  const [preferences, setPreferences] = useState({
+    sleepingHabits: userProfile?.preferences?.sleepingHabits || '',
+    cleanliness: userProfile?.preferences?.cleanliness || '',
+    socialHabits: userProfile?.preferences?.socialHabits || '',
+    smoking: userProfile?.preferences?.smoking || '',
+    drinking: userProfile?.preferences?.drinking || '',
+    schedule: userProfile?.preferences?.schedule || '',
+    noiseTolerance: userProfile?.preferences?.noiseTolerance || '',
+    diet: userProfile?.preferences?.diet || '',
+    pets: userProfile?.preferences?.pets || '',
+    security: userProfile?.preferences?.security || '',
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+  
+  const handlePreferenceChange = (name: string, value: string) => {
+    setPreferences((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = () => {
@@ -45,6 +66,15 @@ const Profile = () => {
     
     setIsEditing(false);
     toast.success('Profile updated successfully!');
+  };
+  
+  const handleSavePreferences = () => {
+    updateUserProfile({
+      preferences: preferences,
+    });
+    
+    setIsPreferencesDialogOpen(false);
+    toast.success('Preferences updated successfully!');
   };
 
   return (
@@ -115,7 +145,7 @@ const Profile = () => {
                   
                   <div className="flex justify-between py-2">
                     <span className="text-muted-foreground">Budget</span>
-                    <span>${userProfile?.profileData?.budget || 'Not set'}</span>
+                    <span>₹{userProfile?.profileData?.budget || 'Not set'}</span>
                   </div>
                 </div>
                 
@@ -193,7 +223,7 @@ const Profile = () => {
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="budget">Monthly Budget ($)</Label>
+                        <Label htmlFor="budget">Monthly Budget (₹)</Label>
                         <Input
                           id="budget"
                           name="budget"
@@ -201,7 +231,7 @@ const Profile = () => {
                           placeholder="Your monthly budget"
                           value={formData.budget}
                           onChange={handleInputChange}
-                          min="100"
+                          min="5000"
                         />
                       </div>
                       
@@ -248,7 +278,7 @@ const Profile = () => {
                       
                       <div>
                         <h3 className="text-sm font-medium text-muted-foreground">Budget</h3>
-                        <p>${userProfile?.profileData?.budget || 'Not set'}</p>
+                        <p>₹{userProfile?.profileData?.budget || 'Not set'}</p>
                       </div>
                       
                       <div>
@@ -324,9 +354,7 @@ const Profile = () => {
                   <div className="mt-6">
                     <AnimatedButton
                       variant="outline"
-                      onClick={() => {
-                        toast.info('To update your preferences, please retake the compatibility questionnaire.');
-                      }}
+                      onClick={() => setIsPreferencesDialogOpen(true)}
                     >
                       Update Preferences
                     </AnimatedButton>
@@ -337,6 +365,205 @@ const Profile = () => {
           </div>
         </main>
       </div>
+      
+      <Dialog open={isPreferencesDialogOpen} onOpenChange={setIsPreferencesDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Update Lifestyle Preferences</DialogTitle>
+            <DialogDescription>
+              Your preferences help us find the most compatible roommates for you.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="sleepingHabits">Sleeping Habits</Label>
+              <Select
+                value={preferences.sleepingHabits}
+                onValueChange={(value) => handlePreferenceChange('sleepingHabits', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your sleeping pattern" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Early riser">Early riser</SelectItem>
+                  <SelectItem value="Night owl">Night owl</SelectItem>
+                  <SelectItem value="Regular schedule">Regular schedule</SelectItem>
+                  <SelectItem value="Irregular schedule">Irregular schedule</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="cleanliness">Cleanliness</Label>
+              <Select
+                value={preferences.cleanliness}
+                onValueChange={(value) => handlePreferenceChange('cleanliness', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select cleanliness level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Very neat">Very neat</SelectItem>
+                  <SelectItem value="Clean">Clean</SelectItem>
+                  <SelectItem value="Moderately clean">Moderately clean</SelectItem>
+                  <SelectItem value="Relaxed">Relaxed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="socialHabits">Social Habits</Label>
+              <Select
+                value={preferences.socialHabits}
+                onValueChange={(value) => handlePreferenceChange('socialHabits', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select social preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Very social">Very social</SelectItem>
+                  <SelectItem value="Moderately social">Moderately social</SelectItem>
+                  <SelectItem value="Occasionally social">Occasionally social</SelectItem>
+                  <SelectItem value="Private person">Private person</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="smoking">Smoking</Label>
+              <Select
+                value={preferences.smoking}
+                onValueChange={(value) => handlePreferenceChange('smoking', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select smoking preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Non-smoker">Non-smoker</SelectItem>
+                  <SelectItem value="Outside only">Outside only</SelectItem>
+                  <SelectItem value="Regular smoker">Regular smoker</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="drinking">Drinking</Label>
+              <Select
+                value={preferences.drinking}
+                onValueChange={(value) => handlePreferenceChange('drinking', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select drinking preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Non-drinker">Non-drinker</SelectItem>
+                  <SelectItem value="Occasional drinker">Occasional drinker</SelectItem>
+                  <SelectItem value="Regular drinker">Regular drinker</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="schedule">Schedule</Label>
+              <Select
+                value={preferences.schedule}
+                onValueChange={(value) => handlePreferenceChange('schedule', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your daily schedule" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="9-5 worker">9-5 worker</SelectItem>
+                  <SelectItem value="Student">Student</SelectItem>
+                  <SelectItem value="Work from home">Work from home</SelectItem>
+                  <SelectItem value="Night shift">Night shift</SelectItem>
+                  <SelectItem value="Irregular hours">Irregular hours</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="noiseTolerance">Noise Tolerance</Label>
+              <Select
+                value={preferences.noiseTolerance}
+                onValueChange={(value) => handlePreferenceChange('noiseTolerance', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select noise tolerance" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Need silence">Need silence</SelectItem>
+                  <SelectItem value="Moderate noise OK">Moderate noise OK</SelectItem>
+                  <SelectItem value="Don't mind noise">Don't mind noise</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="diet">Diet</Label>
+              <Select
+                value={preferences.diet}
+                onValueChange={(value) => handlePreferenceChange('diet', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select diet preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Vegetarian">Vegetarian</SelectItem>
+                  <SelectItem value="Vegan">Vegan</SelectItem>
+                  <SelectItem value="Non-vegetarian">Non-vegetarian</SelectItem>
+                  <SelectItem value="No preference">No preference</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="pets">Pets</Label>
+              <Select
+                value={preferences.pets}
+                onValueChange={(value) => handlePreferenceChange('pets', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select pet preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Have pets">Have pets</SelectItem>
+                  <SelectItem value="Love pets">Love pets</SelectItem>
+                  <SelectItem value="No pets">No pets</SelectItem>
+                  <SelectItem value="Allergic to pets">Allergic to pets</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="security">Security</Label>
+              <Select
+                value={preferences.security}
+                onValueChange={(value) => handlePreferenceChange('security', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select security importance" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="High priority">High priority</SelectItem>
+                  <SelectItem value="Moderate priority">Moderate priority</SelectItem>
+                  <SelectItem value="Low priority">Low priority</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <AnimatedButton variant="outline" onClick={() => setIsPreferencesDialogOpen(false)}>
+              Cancel
+            </AnimatedButton>
+            <AnimatedButton onClick={handleSavePreferences}>
+              Save Preferences
+            </AnimatedButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AuthWrapper>
   );
 };

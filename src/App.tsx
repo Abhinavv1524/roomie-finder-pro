@@ -11,6 +11,7 @@ import Explore from "./pages/Explore";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import LandingPage from "./pages/LandingPage";
 
 // Set the document title
 document.title = "FindMyNest - Find Your Perfect Home & Roommate";
@@ -24,7 +25,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/explore" element={<Explore />} />

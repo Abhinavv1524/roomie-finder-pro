@@ -5,7 +5,7 @@ import { CardMotion, CardMotionContent, CardMotionDescription, CardMotionFooter,
 import { UserButton } from '@clerk/clerk-react';
 import { useAppStore } from '@/lib/store';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Search, Home, Users, Settings, Mail, MapPin, ArrowRight } from 'lucide-react';
+import { Search, Home, Users, Mail, MapPin, ArrowRight, IndianRupee } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
@@ -267,7 +267,7 @@ const Dashboard = () => {
               
               <div className="flex items-center text-muted-foreground mb-4">
                 <Mail className="h-5 w-5 mr-2 text-primary" />
-                <span>support@roomie-finder.com</span>
+                <span>support@findmynest.in</span>
               </div>
               
               <p className="text-muted-foreground mb-4">

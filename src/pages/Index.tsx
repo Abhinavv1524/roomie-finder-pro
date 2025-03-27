@@ -4,7 +4,6 @@ import { Navigate } from 'react-router-dom';
 import AuthWrapper from '@/components/AuthWrapper';
 import ProfileCreation from '@/components/ProfileCreation';
 import { useAppStore } from '@/lib/store';
-import { useEffect } from 'react';
 
 const Index = () => {
   const { isSignedIn, user } = useUser();

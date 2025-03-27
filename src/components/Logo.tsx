@@ -1,5 +1,6 @@
 
 import { motion } from 'framer-motion';
+import { Home } from 'lucide-react';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -52,9 +53,12 @@ const Logo = ({ size = 'md', className = '' }: LogoProps) => {
       whileHover="hover"
       variants={LogoVariants}
     >
+      <span className="mr-2 text-primary">
+        <Home className="w-6 h-6" />
+      </span>
       <span className="relative inline-block">
-        <span className="text-primary">roomie</span>
-        <span className="text-foreground">finder</span>
+        <span className="text-primary">FindMy</span>
+        <span className="text-foreground">Nest</span>
         <motion.span 
           className="absolute bottom-0 left-0 h-[2px] bg-primary rounded-full"
           variants={HighlightVariants}
