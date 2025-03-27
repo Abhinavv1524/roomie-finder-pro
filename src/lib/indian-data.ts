@@ -1,4 +1,3 @@
-
 import { RoommateProfile, Property } from './data';
 
 export const indianRoommates: RoommateProfile[] = [
@@ -496,7 +495,7 @@ export const indianProperties: Property[] = [
     amenities: ["Fully Furnished", "Air Conditioning", "Gym", "Swimming Pool", "Power Backup", "Lift", "Security", "Parking"],
     nearbyFacilities: ["Tech Parks", "Restaurants", "Hospitals", "Shopping Malls"],
     ownerContact: "owner_koramangala@email.com",
-    availableFrom: "2023-12-01",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour1"
   },
   {
@@ -510,7 +509,7 @@ export const indianProperties: Property[] = [
     amenities: ["Semi-Furnished", "Air Conditioning", "Security", "Parking"],
     nearbyFacilities: ["IIT Bombay", "Hiranandani Business Park", "Restaurants", "D-Mart"],
     ownerContact: "owner_powai@email.com",
-    availableFrom: "2023-11-15",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour2"
   },
   {
@@ -524,7 +523,7 @@ export const indianProperties: Property[] = [
     amenities: ["Furnished", "Wi-Fi", "Washing Machine", "Refrigerator", "Gas Connection"],
     nearbyFacilities: ["Metro Station", "Restaurants", "Pubs", "Grocery Stores"],
     ownerContact: "owner_indiranagar@email.com",
-    availableFrom: "2023-11-01",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour3"
   },
   {
@@ -538,7 +537,7 @@ export const indianProperties: Property[] = [
     amenities: ["Semi-Furnished", "Air Conditioning", "Power Backup", "Security", "Parking", "Lift"],
     nearbyFacilities: ["Cyber City", "Metro Station", "Hospitals", "Shopping Malls"],
     ownerContact: "owner_dlf@email.com",
-    availableFrom: "2023-12-15",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour4"
   },
   {
@@ -552,7 +551,7 @@ export const indianProperties: Property[] = [
     amenities: ["Furnished", "Food Included", "Wi-Fi", "Housekeeping", "CCTV", "Laundry"],
     nearbyFacilities: ["Training Institutes", "Metro Station", "Restaurants", "Medical Stores"],
     ownerContact: "owner_ameerpet@email.com",
-    availableFrom: "2023-11-10",
+    available: true,
     virtualTourUrl: null
   },
   {
@@ -566,7 +565,7 @@ export const indianProperties: Property[] = [
     amenities: ["Fully Furnished", "Air Conditioning", "Gym", "Swimming Pool", "Club House", "Power Backup", "Lift", "Security", "Parking", "Indoor Games"],
     nearbyFacilities: ["Shopping Malls", "Hospitals", "Schools", "Restaurants"],
     ownerContact: "owner_annanagar@email.com",
-    availableFrom: "2023-12-01",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour5"
   },
   {
@@ -580,7 +579,7 @@ export const indianProperties: Property[] = [
     amenities: ["Furnished", "Air Conditioning", "Wi-Fi", "House Keeping", "Laundry", "Community Events"],
     nearbyFacilities: ["Tech Parks", "Restaurants", "Supermarkets", "Bus Stand"],
     ownerContact: "owner_hsr@email.com",
-    availableFrom: "2023-11-15",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour6"
   },
   {
@@ -594,7 +593,7 @@ export const indianProperties: Property[] = [
     amenities: ["Semi-Furnished", "Garden", "Parking", "Water Purifier"],
     nearbyFacilities: ["IT Hubs", "Schools", "Hospitals", "Shopping Centers"],
     ownerContact: "owner_aundh@email.com",
-    availableFrom: "2023-12-10",
+    available: true,
     virtualTourUrl: null
   },
   {
@@ -608,7 +607,7 @@ export const indianProperties: Property[] = [
     amenities: ["Bed", "Wi-Fi", "Washing Machine", "Gas Connection", "TV"],
     nearbyFacilities: ["Metro Station", "Coaching Centers", "Restaurants", "Market"],
     ownerContact: "owner_laxminagar@email.com",
-    availableFrom: "2023-11-05",
+    available: true,
     virtualTourUrl: null
   },
   {
@@ -622,7 +621,7 @@ export const indianProperties: Property[] = [
     amenities: ["Semi-Furnished", "Air Conditioning", "Security", "Parking"],
     nearbyFacilities: ["Sector V", "Shopping Malls", "Hospitals", "Bus Stand"],
     ownerContact: "owner_saltlake@email.com",
-    availableFrom: "2023-12-01",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour7"
   },
   {
@@ -636,7 +635,7 @@ export const indianProperties: Property[] = [
     amenities: ["Fully Furnished", "Air Conditioning", "Wi-Fi Ready", "Security", "Lift"],
     nearbyFacilities: ["Railway Station", "Shopping Centers", "Hospitals", "Restaurants"],
     ownerContact: "owner_vashi@email.com",
-    availableFrom: "2023-11-20",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour8"
   },
   {
@@ -650,7 +649,7 @@ export const indianProperties: Property[] = [
     amenities: ["Semi-Furnished", "Air Conditioning", "Power Backup", "Security", "Parking"],
     nearbyFacilities: ["Parks", "Shopping Complex", "Hospitals", "Schools"],
     ownerContact: "owner_jayanagar@email.com",
-    availableFrom: "2023-12-05",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour9"
   },
   {
@@ -664,7 +663,7 @@ export const indianProperties: Property[] = [
     amenities: ["Furnished", "Food Included", "Wi-Fi", "Study Room", "Laundry"],
     nearbyFacilities: ["Coaching Centers", "Libraries", "Stationary Shops", "Medical Stores"],
     ownerContact: "owner_kota@email.com",
-    availableFrom: "2023-11-10",
+    available: true,
     virtualTourUrl: null
   },
   {
@@ -678,7 +677,7 @@ export const indianProperties: Property[] = [
     amenities: ["Fully Furnished", "Air Conditioning", "Private Garden", "Gym", "Swimming Pool", "Club House", "Security", "Parking"],
     nearbyFacilities: ["Tech Parks", "International Schools", "Hospitals", "Shopping Malls"],
     ownerContact: "owner_whitefield@email.com",
-    availableFrom: "2023-12-15",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour10"
   },
   {
@@ -692,7 +691,7 @@ export const indianProperties: Property[] = [
     amenities: ["Semi-Furnished", "Wi-Fi Ready", "Water Purifier"],
     nearbyFacilities: ["Railway Station", "Metro Station", "Markets", "Restaurants"],
     ownerContact: "owner_andheri@email.com",
-    availableFrom: "2023-11-10",
+    available: true,
     virtualTourUrl: null
   },
   {
@@ -706,7 +705,7 @@ export const indianProperties: Property[] = [
     amenities: ["Furnished", "Air Conditioning", "Wi-Fi", "House Keeping", "Laundry", "Security"],
     nearbyFacilities: ["Tech Parks", "Shopping Centers", "Hospitals", "Bus Stand"],
     ownerContact: "owner_electroniccity@email.com",
-    availableFrom: "2023-11-15",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour11"
   },
   {
@@ -720,7 +719,7 @@ export const indianProperties: Property[] = [
     amenities: ["Fully Furnished", "Air Conditioning", "Gym", "Security", "Parking", "Lift", "Power Backup"],
     nearbyFacilities: ["Hospitals", "Shopping Malls", "Restaurants", "Schools"],
     ownerContact: "owner_banjarahills@email.com",
-    availableFrom: "2023-12-10",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour12"
   },
   {
@@ -734,7 +733,7 @@ export const indianProperties: Property[] = [
     amenities: ["Furnished", "Food Included", "Wi-Fi", "TV", "Washing Machine"],
     nearbyFacilities: ["Tech Parks", "Bus Stand", "Grocery Stores", "Restaurants"],
     ownerContact: "owner_btm@email.com",
-    availableFrom: "2023-11-05",
+    available: true,
     virtualTourUrl: null
   },
   {
@@ -748,7 +747,7 @@ export const indianProperties: Property[] = [
     amenities: ["Semi-Furnished", "Air Conditioning", "Power Backup", "Security"],
     nearbyFacilities: ["Metro Station", "Shopping Centers", "Hospitals", "Schools"],
     ownerContact: "owner_ashoknagar@email.com",
-    availableFrom: "2023-11-25",
+    available: true,
     virtualTourUrl: "https://youtu.be/example_tour13"
   },
   {
@@ -762,7 +761,7 @@ export const indianProperties: Property[] = [
     amenities: ["Semi-Furnished", "Power Backup", "Parking", "Water Purifier"],
     nearbyFacilities: ["Metro Station", "Schools", "Markets", "Hospitals"],
     ownerContact: "owner_vaishali@email.com",
-    availableFrom: "2023-12-05",
+    available: true,
     virtualTourUrl: null
   }
 ];
