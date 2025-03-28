@@ -13,7 +13,9 @@ const Index = () => {
   if (!isSignedIn) {
     return (
       <AuthWrapper>
-        <div></div>
+        <div className="min-h-screen flex items-center justify-center">
+          <h2 className="text-2xl text-center">Sign in to continue</h2>
+        </div>
       </AuthWrapper>
     );
   }

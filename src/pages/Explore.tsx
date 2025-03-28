@@ -6,13 +6,15 @@ import Logo from '@/components/Logo';
 import { useNavigate } from 'react-router-dom';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { motion } from 'framer-motion';
+import { useAppStore } from '@/lib/store';
 
 const ExplorePage = () => {
   const navigate = useNavigate();
+  const { userProfile } = useAppStore();
 
   return (
     <AuthWrapper>
-      <ProfileCreation />
+      {!userProfile?.isProfileComplete && <ProfileCreation />}
       <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
         <header className="glass-panel sticky top-0 z-10 backdrop-blur-md border-b border-border/40">
           <div className="container mx-auto px-4 py-3 flex justify-between items-center">
