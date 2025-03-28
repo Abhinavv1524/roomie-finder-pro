@@ -39,11 +39,9 @@ const ExploreSection = () => {
   const [roommatePreferences, setRoommatePreferences] = useState<Record<string, string>>({});
   const [roomPreferences, setRoomPreferences] = useState<Record<string, any>>({});
   
-  // Use Indian data instead of sample data
   const allRoommates = indianRoommates.length > 0 ? indianRoommates : sampleRoommates;
   const allProperties = indianProperties.length > 0 ? indianProperties : sampleProperties;
   
-  // Get selected property for payment
   const selectedProperty = allProperties.find(p => p.id === selectedPropertyForPayment);
 
   const handleSelectMode = (mode: 'roommate' | 'room') => {
@@ -78,11 +76,8 @@ const ExploreSection = () => {
     setRoommatePreferences(preferences);
     setShowQuestionnaire(false);
     
-    // Apply AI-driven compatibility scoring and filtering
     let filtered = [...allRoommates];
     
-    // Apply basic filters first
-    // Filter by age if specified
     if (preferences.age_preference && preferences.age_preference !== 'any') {
       const [minAge, maxAge] = preferences.age_preference.split('-').map(Number);
       filtered = filtered.filter(roommate => 
@@ -90,14 +85,12 @@ const ExploreSection = () => {
       );
     }
     
-    // Filter by gender if specified
     if (preferences.gender_preference && preferences.gender_preference !== 'any') {
       filtered = filtered.filter(roommate => 
         roommate.gender.toLowerCase() === preferences.gender_preference
       );
     }
     
-    // Filter by occupation if specified
     if (preferences.occupation && preferences.occupation !== 'any') {
       filtered = filtered.filter(roommate => {
         const occupation = roommate.occupation.toLowerCase();
@@ -114,7 +107,6 @@ const ExploreSection = () => {
       });
     }
     
-    // Filter by food preference if specified
     if (preferences.food_preference && preferences.food_preference !== 'any') {
       filtered = filtered.filter(roommate => {
         const diet = roommate.preferences.diet.toLowerCase();
@@ -122,7 +114,6 @@ const ExploreSection = () => {
       });
     }
     
-    // Filter by hometown preference if specified
     if (preferences.hometown_preference && preferences.hometown_preference !== 'any') {
       filtered = filtered.filter(roommate => {
         const location = roommate.location.toLowerCase();
@@ -139,21 +130,17 @@ const ExploreSection = () => {
       });
     }
     
-    // Apply advanced compatibility scoring if user profile exists
     if (userProfile) {
-      // Calculate compatibility scores for each filtered roommate
       filtered.forEach(roommate => {
         const score = calculateCompatibility(userProfile, roommate);
         roommate.compatibilityScores[userProfile.userId] = score;
       });
       
-      // Sort by compatibility score (highest first)
       filtered.sort((a, b) => 
         (b.compatibilityScores[userProfile.userId] || 0) - 
         (a.compatibilityScores[userProfile.userId] || 0)
       );
       
-      // Prioritize very high compatibility matches (80%+) at the beginning
       const highCompat = filtered.filter(r => (r.compatibilityScores[userProfile.userId] || 0) >= 80);
       const mediumCompat = filtered.filter(r => {
         const score = r.compatibilityScores[userProfile.userId] || 0;
@@ -161,7 +148,10 @@ const ExploreSection = () => {
       });
       const lowCompat = filtered.filter(r => (r.compatibilityScores[userProfile.userId] || 0) < 60);
       
-      // Combine with high compatibility first
+      if (highCompat.length > 0) {
+        toast.success(`AI found ${highCompat.length} highly compatible roommates for you!`);
+      }
+      
       filtered = [...highCompat, ...mediumCompat, ...lowCompat];
     }
     
@@ -173,15 +163,12 @@ const ExploreSection = () => {
     setRoomPreferences(preferences);
     setShowQuestionnaire(false);
     
-    // Filter properties based on preferences and room type
     let filtered = [...allProperties];
     
-    // Filter by room type
     if (roomPreference) {
       filtered = filtered.filter(property => property.roomType === roomPreference);
     }
     
-    // Filter by budget if specified
     if (preferences.budget) {
       const [minBudget, maxBudget] = preferences.budget.split('-').map(str => 
         parseInt(str.replace(/\D/g, ''))
@@ -191,7 +178,6 @@ const ExploreSection = () => {
       );
     }
     
-    // Filter by amenities if specified
     if (preferences.amenities && preferences.amenities.length > 0) {
       filtered = filtered.filter(property => 
         preferences.amenities.some((amenity: string) => 
@@ -200,7 +186,6 @@ const ExploreSection = () => {
       );
     }
     
-    // Filter by location if specified
     if (preferences.location && preferences.location.trim() !== '') {
       const locationSearch = preferences.location.toLowerCase();
       filtered = filtered.filter(property => 
@@ -213,7 +198,6 @@ const ExploreSection = () => {
   };
 
   const handleRoommateAction = (action: 'like' | 'pass', roommate: RoommateProfile) => {
-    // Move to the next roommate
     if (currentRoommateIndex < filteredRoommates.length - 1) {
       setCurrentRoommateIndex(prev => prev + 1);
     } else {
@@ -223,7 +207,6 @@ const ExploreSection = () => {
   };
 
   const handlePropertyAction = (action: 'like' | 'pass', property: Property) => {
-    // Move to the next property
     if (currentPropertyIndex < filteredProperties.length - 1) {
       setCurrentPropertyIndex(prev => prev + 1);
     } else {

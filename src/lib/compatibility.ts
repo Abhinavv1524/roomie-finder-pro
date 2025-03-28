@@ -1,6 +1,7 @@
 
 import { UserProfile } from './store';
 import { RoommateProfile } from './data';
+import { calculateMLCompatibility } from './ml-compatibility';
 
 // Map preference values to a standardized format for comparison
 const preferenceMapping = {
@@ -220,12 +221,19 @@ const calculatePreferenceMatch = (
 // 3. Budget alignment
 // 4. Location/cultural compatibility
 // 5. Lifestyle similarity
+// 6. Now uses ML-based vector similarity for improved matching
 export const calculateCompatibility = (
   userProfile: UserProfile,
   roommateProfile: RoommateProfile
 ): number => {
   if (!userProfile.preferences) return 0;
-
+  
+  // Use ML-based compatibility calculation if profile has enough data
+  if (userProfile.profileData && Object.keys(userProfile.preferences).length > 3) {
+    return calculateMLCompatibility(userProfile, roommateProfile);
+  }
+  
+  // Fall back to the original algorithm if not enough data
   let totalScore = 0;
   let maxPossibleScore = 0;
 
