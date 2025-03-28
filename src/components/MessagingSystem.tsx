@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { X, Send, User, VideoIcon, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAppStore } from '@/lib/store';
+import { useAppStore, SavedContact } from '@/lib/store';
 import { toast } from 'sonner';
 
 type Message = {
@@ -101,7 +101,7 @@ const generateReply = (message: string, contactType: 'roommate' | 'propertyOwner
 };
 
 // Get saved message data for a contact (or create new messages if none exist)
-const getSavedMessages = (contactId: string, savedContacts: any[]): Message[] => {
+const getSavedMessages = (contactId: string, savedContacts: SavedContact[]): Message[] => {
   const contact = savedContacts.find(c => c.id === contactId);
   const contactType = contact?.type || 'roommate';
   
@@ -151,14 +151,14 @@ const MessagingSystem = ({ isOpen, onClose, initialContactId }: MessagingSystemP
   const [newMessage, setNewMessage] = useState('');
   const [showContacts, setShowContacts] = useState(!initialContactId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [contacts, setContacts] = useState(savedContacts);
+  const [contacts, setContacts] = useState<SavedContact[]>(savedContacts);
 
   // Initialize with saved contacts or demo contacts if none exist
   useEffect(() => {
     if (savedContacts.length > 0) {
       setContacts(savedContacts);
     } else {
-      const demoContacts = [
+      const demoContacts: SavedContact[] = [
         {
           id: "demo-roommate-1",
           name: "Rahul Sharma",
@@ -228,7 +228,7 @@ const MessagingSystem = ({ isOpen, onClose, initialContactId }: MessagingSystemP
     // Generate reply after a delay
     const replyDelay = Math.floor(Math.random() * 2000) + 1000;
     setTimeout(() => {
-      const replyText = generateReply(newMessage, contactType as 'roommate' | 'propertyOwner');
+      const replyText = generateReply(newMessage, contactType);
       
       const replyMessage: Message = {
         id: `msg-${Date.now() + 1}`,

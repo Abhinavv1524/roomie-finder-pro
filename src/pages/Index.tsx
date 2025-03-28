@@ -11,7 +11,11 @@ const Index = () => {
   
   // If user is not signed in, show auth wrapper
   if (!isSignedIn) {
-    return <AuthWrapper />;
+    return (
+      <AuthWrapper>
+        <div></div>
+      </AuthWrapper>
+    );
   }
   
   // If the user is signed in and has completed their profile
