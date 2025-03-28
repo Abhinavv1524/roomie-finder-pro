@@ -132,7 +132,7 @@ const getSavedMessages = (contactId: string, savedContacts: SavedContact[]): Mes
         id: `${contactId}-msg-last`,
         sender: 'You',
         text: contact.lastMessage,
-        timestamp: contact.lastMessageTime || new Date(),
+        timestamp: contact.lastMessageTime instanceof Date ? contact.lastMessageTime : new Date(),
         isFromCurrentUser: true
       });
     }
@@ -246,7 +246,12 @@ const MessagingSystem = ({ isOpen, onClose, initialContactId }: MessagingSystemP
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const formatContactTime = (date: Date) => {
+  const formatContactTime = (date: Date | undefined) => {
+    // Make sure date is a valid Date object
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      return '';
+    }
+    
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
     
@@ -346,11 +351,9 @@ const MessagingSystem = ({ isOpen, onClose, initialContactId }: MessagingSystemP
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-baseline">
                             <p className="font-medium truncate">{contact.name}</p>
-                            {contact.lastMessageTime && (
-                              <span className="text-xs text-muted-foreground">
-                                {formatContactTime(contact.lastMessageTime)}
-                              </span>
-                            )}
+                            <span className="text-xs text-muted-foreground">
+                              {formatContactTime(contact.lastMessageTime)}
+                            </span>
                           </div>
                           {contact.lastMessage && (
                             <p className="text-sm text-muted-foreground truncate">{contact.lastMessage}</p>
