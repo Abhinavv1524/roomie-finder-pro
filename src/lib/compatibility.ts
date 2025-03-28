@@ -41,10 +41,10 @@ const preferenceMapping = {
     shifts: 'Shifts',
   },
   budget: {
-    low: '$500-$800',
-    medium: '$800-$1,200',
-    high: '$1,200-$1,500',
-    luxury: '$1,500+',
+    low: '₹5,000-₹8,000',
+    medium: '₹8,000-₹12,000',
+    high: '₹12,000-₹15,000',
+    luxury: '₹15,000+',
   },
   noiseTolerance: {
     low: 'Low',
@@ -64,6 +64,12 @@ const preferenceMapping = {
     allergic: 'Allergic',
     no_pets: 'No Pets',
   },
+  security: {
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+    critical: 'Critical',
+  },
 };
 
 // Weight each category by importance in roommate compatibility
@@ -78,9 +84,86 @@ const categoryWeights = {
   noiseTolerance: 1.0,
   diet: 0.75,
   pets: 1.0,
+  security: 1.25,
 };
 
-// Calculate compatibility between preferences
+// Compatibility matrix for specific preference combinations
+const compatibilityMatrix = {
+  sleepingHabits: {
+    'early_riser-early_riser': 10,
+    'early_riser-regular': 7,
+    'early_riser-night_owl': 3,
+    'early_riser-varies': 6,
+    'regular-regular': 10,
+    'regular-night_owl': 5,
+    'regular-varies': 7,
+    'night_owl-night_owl': 10,
+    'night_owl-varies': 6,
+    'varies-varies': 8,
+  },
+  cleanliness: {
+    'very_neat-very_neat': 10,
+    'very_neat-neat': 8,
+    'very_neat-average': 5,
+    'very_neat-relaxed': 2,
+    'neat-neat': 10,
+    'neat-average': 7,
+    'neat-relaxed': 4,
+    'average-average': 10, 
+    'average-relaxed': 6,
+    'relaxed-relaxed': 10,
+  },
+  socialHabits: {
+    'introvert-introvert': 10,
+    'introvert-balanced': 7,
+    'introvert-extrovert': 4,
+    'introvert-varies': 6,
+    'balanced-balanced': 10,
+    'balanced-extrovert': 7,
+    'balanced-varies': 8,
+    'extrovert-extrovert': 10,
+    'extrovert-varies': 6,
+    'varies-varies': 8,
+  },
+  smoking: {
+    'non_smoker-non_smoker': 10,
+    'non_smoker-outside_only': 6,
+    'non_smoker-occasional': 3,
+    'non_smoker-smoker': 1,
+    'outside_only-outside_only': 10,
+    'outside_only-occasional': 7,
+    'outside_only-smoker': 5,
+    'occasional-occasional': 10,
+    'occasional-smoker': 8,
+    'smoker-smoker': 10,
+  },
+  drinking: {
+    'none-none': 10,
+    'none-rarely': 7,
+    'none-social': 4,
+    'none-regular': 2,
+    'rarely-rarely': 10,
+    'rarely-social': 7,
+    'rarely-regular': 5,
+    'social-social': 10,
+    'social-regular': 7,
+    'regular-regular': 10,
+  },
+  pets: {
+    'love-love': 10,
+    'love-ok': 8,
+    'love-allergic': 1,
+    'love-no_pets': 3,
+    'ok-ok': 10,
+    'ok-allergic': 3,
+    'ok-no_pets': 6,
+    'allergic-allergic': 10,
+    'allergic-no_pets': 8,
+    'no_pets-no_pets': 10,
+  },
+};
+
+// Calculate compatibility between preferences using the matrix
 const calculatePreferenceMatch = (
   pref1: string,
   pref2: string,
@@ -89,51 +172,54 @@ const calculatePreferenceMatch = (
   // For exact matches, return full points
   if (pref1 === pref2) return 10 * categoryWeights[category as keyof typeof categoryWeights];
 
-  // Handle special cases of compatibility
-  switch (category) {
-    case 'sleepingHabits':
-      // Night owls and early risers might conflict
-      if (
-        (pref1 === 'early_riser' && pref2 === 'night_owl') ||
-        (pref1 === 'night_owl' && pref2 === 'early_riser')
-      ) {
-        return 3 * categoryWeights.sleepingHabits;
-      }
-      break;
-    case 'cleanliness':
-      // Very neat and relaxed might conflict
-      if (
-        (pref1 === 'very_neat' && pref2 === 'relaxed') ||
-        (pref1 === 'relaxed' && pref2 === 'very_neat')
-      ) {
-        return 2 * categoryWeights.cleanliness;
-      }
-      break;
-    case 'smoking':
-      // Non-smokers and smokers might conflict severely
-      if (
-        (pref1 === 'non_smoker' && pref2 === 'smoker') ||
-        (pref1 === 'smoker' && pref2 === 'non_smoker')
-      ) {
-        return 1 * categoryWeights.smoking;
-      }
-      break;
-    case 'pets':
-      // Pet allergies and pet lovers might conflict severely
-      if (
-        (pref1 === 'allergic' && pref2 === 'love') ||
-        (pref1 === 'love' && pref2 === 'allergic')
-      ) {
-        return 1 * categoryWeights.pets;
-      }
-      break;
+  // Check the compatibility matrix
+  const matrixKey = `${pref1}-${pref2}`;
+  const reverseMatrixKey = `${pref2}-${pref1}`;
+  
+  if (
+    category in compatibilityMatrix && 
+    (matrixKey in compatibilityMatrix[category as keyof typeof compatibilityMatrix] || 
+     reverseMatrixKey in compatibilityMatrix[category as keyof typeof compatibilityMatrix])
+  ) {
+    const score = compatibilityMatrix[category as keyof typeof compatibilityMatrix][
+      matrixKey as keyof typeof compatibilityMatrix[keyof typeof compatibilityMatrix]
+    ] || compatibilityMatrix[category as keyof typeof compatibilityMatrix][
+      reverseMatrixKey as keyof typeof compatibilityMatrix[keyof typeof compatibilityMatrix]
+    ];
+    return score * categoryWeights[category as keyof typeof categoryWeights];
   }
 
-  // For other combinations, return partial match
+  // For budget compatibility
+  if (category === 'budget') {
+    const budgetValues = {
+      'low': 1,
+      'medium': 2,
+      'high': 3,
+      'luxury': 4,
+    };
+    
+    const budget1 = budgetValues[pref1 as keyof typeof budgetValues] || 0;
+    const budget2 = budgetValues[pref2 as keyof typeof budgetValues] || 0;
+    
+    // If budgets are the same or adjacent categories
+    if (Math.abs(budget1 - budget2) <= 1) {
+      return (10 - Math.abs(budget1 - budget2) * 2) * categoryWeights.budget;
+    }
+    // Bigger difference in budget
+    return (5 - Math.abs(budget1 - budget2)) * categoryWeights.budget;
+  }
+
+  // For categories without specific matrix entries or special cases,
+  // return a moderate compatibility score
   return 6 * categoryWeights[category as keyof typeof categoryWeights];
 };
 
-// Calculate overall compatibility score
+// Enhanced ML-inspired compatibility algorithm that takes into account:
+// 1. Direct preference matching with weighted importance
+// 2. Special compatibility rules for certain combinations
+// 3. Budget alignment
+// 4. Location/cultural compatibility
+// 5. Lifestyle similarity
 export const calculateCompatibility = (
   userProfile: UserProfile,
   roommateProfile: RoommateProfile
@@ -156,6 +242,41 @@ export const calculateCompatibility = (
       maxPossibleScore += 10 * weight;
     }
   });
+
+  // Additional location compatibility bonus
+  if (userProfile.profileData?.location && roommateProfile.location) {
+    const userLocation = userProfile.profileData.location.toLowerCase();
+    const roommateLocation = roommateProfile.location.toLowerCase();
+    
+    // Same city bonus
+    if (userLocation.split(',')[0].trim() === roommateLocation.split(',')[0].trim()) {
+      totalScore += 10; // Extra points for same city
+      maxPossibleScore += 10;
+    } 
+    // Same state/region bonus
+    else if (userLocation.includes(roommateLocation.split(',')[1]?.trim() || '')) {
+      totalScore += 5; // Partial points for same state
+      maxPossibleScore += 10;
+    } else {
+      maxPossibleScore += 10; // Add to denominator but no points
+    }
+  }
+
+  // Age compatibility - prefer closer age ranges
+  if (userProfile.profileData?.age && roommateProfile.age) {
+    const ageDiff = Math.abs(userProfile.profileData.age - roommateProfile.age);
+    const ageCompat = Math.max(0, 10 - ageDiff);
+    totalScore += ageCompat;
+    maxPossibleScore += 10;
+  }
+  
+  // Gender compatibility (if preference exists)
+  if (userProfile.profileData?.gender && roommateProfile.gender) {
+    // Same gender bonus for traditional preferences
+    const sameGender = userProfile.profileData.gender.toLowerCase() === roommateProfile.gender.toLowerCase();
+    totalScore += sameGender ? 8 : 5;
+    maxPossibleScore += 10;
+  }
 
   // Convert to percentage rounded to nearest whole number
   const compatibilityPercentage = Math.round((totalScore / maxPossibleScore) * 100);

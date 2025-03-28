@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -79,9 +78,10 @@ const ExploreSection = () => {
     setRoommatePreferences(preferences);
     setShowQuestionnaire(false);
     
-    // Filter and sort roommates based on preferences
+    // Apply AI-driven compatibility scoring and filtering
     let filtered = [...allRoommates];
     
+    // Apply basic filters first
     // Filter by age if specified
     if (preferences.age_preference && preferences.age_preference !== 'any') {
       const [minAge, maxAge] = preferences.age_preference.split('-').map(Number);
@@ -114,7 +114,7 @@ const ExploreSection = () => {
       });
     }
     
-    // Filter by food preference if specified (new)
+    // Filter by food preference if specified
     if (preferences.food_preference && preferences.food_preference !== 'any') {
       filtered = filtered.filter(roommate => {
         const diet = roommate.preferences.diet.toLowerCase();
@@ -122,7 +122,7 @@ const ExploreSection = () => {
       });
     }
     
-    // Filter by hometown preference if specified (new)
+    // Filter by hometown preference if specified
     if (preferences.hometown_preference && preferences.hometown_preference !== 'any') {
       filtered = filtered.filter(roommate => {
         const location = roommate.location.toLowerCase();
@@ -139,18 +139,30 @@ const ExploreSection = () => {
       });
     }
     
-    // Calculate compatibility scores if user profile exists
+    // Apply advanced compatibility scoring if user profile exists
     if (userProfile) {
+      // Calculate compatibility scores for each filtered roommate
       filtered.forEach(roommate => {
         const score = calculateCompatibility(userProfile, roommate);
         roommate.compatibilityScores[userProfile.userId] = score;
       });
       
-      // Sort by compatibility score
+      // Sort by compatibility score (highest first)
       filtered.sort((a, b) => 
         (b.compatibilityScores[userProfile.userId] || 0) - 
         (a.compatibilityScores[userProfile.userId] || 0)
       );
+      
+      // Prioritize very high compatibility matches (80%+) at the beginning
+      const highCompat = filtered.filter(r => (r.compatibilityScores[userProfile.userId] || 0) >= 80);
+      const mediumCompat = filtered.filter(r => {
+        const score = r.compatibilityScores[userProfile.userId] || 0;
+        return score >= 60 && score < 80;
+      });
+      const lowCompat = filtered.filter(r => (r.compatibilityScores[userProfile.userId] || 0) < 60);
+      
+      // Combine with high compatibility first
+      filtered = [...highCompat, ...mediumCompat, ...lowCompat];
     }
     
     setFilteredRoommates(filtered.length > 0 ? filtered : allRoommates);
@@ -485,14 +497,12 @@ const ExploreSection = () => {
         ) : null}
       </AnimatePresence>
       
-      {/* Messaging System */}
       <MessagingSystem 
         isOpen={isMessagingOpen} 
         onClose={() => setMessagingOpen(false)}
         initialContactId={activeContactId || undefined}
       />
       
-      {/* Payment System */}
       <PaymentSystem 
         isOpen={isPaymentModalOpen} 
         onClose={() => setPaymentModalOpen(false)}

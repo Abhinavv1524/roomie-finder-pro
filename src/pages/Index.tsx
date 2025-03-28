@@ -9,16 +9,19 @@ const Index = () => {
   const { isSignedIn, user } = useUser();
   const { userProfile, isProfileCreationOpen } = useAppStore();
   
+  // If user is not signed in, show auth wrapper
+  if (!isSignedIn) {
+    return <AuthWrapper />;
+  }
+  
   // If the user is signed in and has completed their profile
-  if (isSignedIn && userProfile && !userProfile.isNewUser && !isProfileCreationOpen) {
+  if (userProfile && !userProfile.isNewUser && !isProfileCreationOpen) {
     return <Navigate to="/dashboard" replace />;
   }
 
+  // If user is signed in but hasn't completed profile creation
   return (
-    <AuthWrapper>
-      <ProfileCreation />
-      <Navigate to="/dashboard" replace />
-    </AuthWrapper>
+    <ProfileCreation />
   );
 };
 

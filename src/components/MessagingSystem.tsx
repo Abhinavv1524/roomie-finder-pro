@@ -18,84 +18,187 @@ type Message = {
   isFromCurrentUser: boolean;
 };
 
-type Contact = {
-  id: string;
-  name: string;
-  avatar: string;
-  lastMessage?: string;
-  lastMessageTime?: Date;
-  unreadCount?: number;
-  online?: boolean;
-};
-
-// Sample conversation data - in a real app, this would come from a database
-const generateSampleMessages = (contactId: string): Message[] => {
-  const baseMessages = [
-    { text: "Hi there, I'm interested in the property/profile", isFromCurrentUser: false },
-    { text: "Hello! Thank you for reaching out. I'm happy to answer any questions", isFromCurrentUser: true },
-    { text: "What's the availability like?", isFromCurrentUser: false },
-    { text: "It's available from next month onwards", isFromCurrentUser: true },
-    { text: "That sounds perfect. Could we schedule a viewing?", isFromCurrentUser: false },
-    { text: "Sure, how about this weekend?", isFromCurrentUser: true },
-    { text: "Saturday afternoon works for me", isFromCurrentUser: false },
-    { text: "Great! I'll set it up and send you the details", isFromCurrentUser: true }
-  ];
-
-  return baseMessages.map((msg, index) => ({
-    id: `${contactId}-msg-${index}`,
-    sender: msg.isFromCurrentUser ? 'You' : contactId,
-    text: msg.text,
-    timestamp: new Date(Date.now() - (baseMessages.length - index) * 3600000),
-    isFromCurrentUser: msg.isFromCurrentUser
-  }));
-};
-
 interface MessagingSystemProps {
   isOpen: boolean;
   onClose: () => void;
   initialContactId?: string;
 }
 
+// Predefined message templates for different contact types
+const messageTemplates = {
+  roommate: [
+    "Hi there! I noticed we matched as potential roommates.",
+    "Hello! I'm interested in knowing more about your living preferences.",
+    "Would you be interested in viewing some apartments together?",
+    "What areas of the city are you looking to live in?",
+    "I'm looking for a place starting next month. What's your timeline?",
+    "Do you have any specific requirements for a living space?"
+  ],
+  propertyOwner: [
+    "Is this property still available?",
+    "I'm interested in scheduling a viewing. When would be a good time?",
+    "What's the minimum lease duration?",
+    "Are utilities included in the rent?",
+    "Is the security deposit negotiable?",
+    "Are pets allowed in the property?"
+  ]
+};
+
+// Generate contextually relevant replies
+const generateReply = (message: string, contactType: 'roommate' | 'propertyOwner'): string => {
+  // Simple keyword-based response system
+  const lowerMsg = message.toLowerCase();
+  
+  // General responses
+  if (lowerMsg.includes('hello') || lowerMsg.includes('hi ') || lowerMsg.includes('hey')) {
+    return "Hello! How can I help you today?";
+  }
+  
+  if (contactType === 'roommate') {
+    if (lowerMsg.includes('when') && (lowerMsg.includes('move') || lowerMsg.includes('available'))) {
+      return "I'm looking to move in within the next 30 days. How about you?";
+    }
+    
+    if (lowerMsg.includes('budget') || lowerMsg.includes('rent') || lowerMsg.includes('price')) {
+      return "My budget is between ₹10,000-₹15,000 per month, including utilities. Does that work for you?";
+    }
+    
+    if (lowerMsg.includes('prefer') || lowerMsg.includes('area') || lowerMsg.includes('location')) {
+      return "I prefer areas near the city center or with good public transport. South Delhi and Gurgaon are my top choices.";
+    }
+    
+    if (lowerMsg.includes('meet') || lowerMsg.includes('coffee') || lowerMsg.includes('chat')) {
+      return "Yes, I'd be happy to meet up! How about coffee this weekend to discuss more?";
+    }
+    
+    // Default roommate response
+    return "Thanks for reaching out! I'm looking for someone clean, respectful of privacy, and reliable with rent. What are your top requirements in a roommate?";
+  } else {
+    // Property owner responses
+    if (lowerMsg.includes('available')) {
+      return "Yes, the property is still available! When would you like to schedule a viewing?";
+    }
+    
+    if (lowerMsg.includes('viewing') || lowerMsg.includes('visit') || lowerMsg.includes('see')) {
+      return "I can arrange a viewing this weekend. Would Saturday or Sunday work better for you?";
+    }
+    
+    if (lowerMsg.includes('deposit') || lowerMsg.includes('security')) {
+      return "The security deposit is equal to two months of rent. It's fully refundable at the end of your lease period.";
+    }
+    
+    if (lowerMsg.includes('utilities') || lowerMsg.includes('bills') || lowerMsg.includes('water') || lowerMsg.includes('electricity')) {
+      return "Water is included in the rent. Electricity and internet will be separate based on your usage.";
+    }
+    
+    if (lowerMsg.includes('pet') || lowerMsg.includes('dog') || lowerMsg.includes('cat')) {
+      return "Small pets are allowed with an additional deposit of ₹5,000. Please let me know what pet you have.";
+    }
+    
+    // Default property owner response
+    return "Thank you for your interest in the property! The minimum lease term is 11 months. Let me know if you have any other questions.";
+  }
+};
+
+// Get saved message data for a contact (or create new messages if none exist)
+const getSavedMessages = (contactId: string, savedContacts: any[]): Message[] => {
+  const contact = savedContacts.find(c => c.id === contactId);
+  const contactType = contact?.type || 'roommate';
+  
+  // If there's a last message, create a chat history
+  if (contact?.lastMessage) {
+    // Create a basic conversation with 2-6 messages
+    const numMessages = Math.floor(Math.random() * 4) + 2;
+    const messages: Message[] = [];
+    
+    for (let i = 0; i < numMessages; i++) {
+      const isFromCurrentUser = i % 2 === 0;
+      const messageText = isFromCurrentUser 
+        ? messageTemplates[contactType][i % messageTemplates[contactType].length]
+        : generateReply(messageTemplates[contactType][i % messageTemplates[contactType].length], contactType);
+        
+      messages.push({
+        id: `${contactId}-msg-${i}`,
+        sender: isFromCurrentUser ? 'You' : contactId,
+        text: messageText,
+        timestamp: new Date(Date.now() - (numMessages - i) * 3600000),
+        isFromCurrentUser
+      });
+    }
+    
+    // Add the actual last message if it exists
+    if (contact.lastMessage) {
+      messages.push({
+        id: `${contactId}-msg-last`,
+        sender: 'You',
+        text: contact.lastMessage,
+        timestamp: contact.lastMessageTime || new Date(),
+        isFromCurrentUser: true
+      });
+    }
+    
+    return messages;
+  }
+  
+  // Return empty array if no message history
+  return [];
+};
+
 const MessagingSystem = ({ isOpen, onClose, initialContactId }: MessagingSystemProps) => {
-  const { savedContacts } = useAppStore();
+  const { savedContacts, addSavedContact } = useAppStore();
   const [activeContactId, setActiveContactId] = useState<string | null>(initialContactId || null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [showContacts, setShowContacts] = useState(!initialContactId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  // For demo purposes, creating sample contacts if none exist
-  const [contacts, setContacts] = useState<Contact[]>(
-    savedContacts.length > 0 
-      ? savedContacts 
-      : [
-          {
-            id: "demo-contact-1",
-            name: "Rahul Sharma",
-            avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-            lastMessage: "Saturday afternoon works for me",
-            lastMessageTime: new Date(Date.now() - 1 * 3600000),
-            unreadCount: 0,
-            online: true
-          },
-          {
-            id: "demo-contact-2",
-            name: "Priya Patel",
-            avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-            lastMessage: "Is the room still available?",
-            lastMessageTime: new Date(Date.now() - 5 * 3600000),
-            unreadCount: 2,
-            online: false
-          }
-        ]
-  );
+  const [contacts, setContacts] = useState(savedContacts);
 
+  // Initialize with saved contacts or demo contacts if none exist
+  useEffect(() => {
+    if (savedContacts.length > 0) {
+      setContacts(savedContacts);
+    } else {
+      const demoContacts = [
+        {
+          id: "demo-roommate-1",
+          name: "Rahul Sharma",
+          avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+          lastMessage: "Saturday afternoon works for me",
+          lastMessageTime: new Date(Date.now() - 1 * 3600000),
+          unreadCount: 0,
+          online: true,
+          type: 'roommate'
+        },
+        {
+          id: "demo-owner-1",
+          name: "Priya Patel",
+          avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+          lastMessage: "Is the room still available?",
+          lastMessageTime: new Date(Date.now() - 5 * 3600000),
+          unreadCount: 2,
+          online: false,
+          type: 'propertyOwner'
+        }
+      ];
+      
+      // Add demo contacts to store
+      demoContacts.forEach(contact => {
+        addSavedContact(contact);
+      });
+      
+      setContacts(demoContacts);
+    }
+  }, [savedContacts, addSavedContact]);
+
+  // Load messages when active contact changes
   useEffect(() => {
     if (activeContactId) {
-      setMessages(generateSampleMessages(activeContactId));
+      const savedMessageHistory = getSavedMessages(activeContactId, contacts);
+      setMessages(savedMessageHistory);
     }
-  }, [activeContactId]);
+  }, [activeContactId, contacts]);
 
+  // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -118,16 +221,23 @@ const MessagingSystem = ({ isOpen, onClose, initialContactId }: MessagingSystemP
     setMessages([...messages, message]);
     setNewMessage('');
     
-    // Simulate reply after 1-3 seconds for demo purposes
+    // Find the active contact to determine type
+    const activeContact = contacts.find(c => c.id === activeContactId);
+    const contactType = activeContact?.type || 'roommate';
+    
+    // Generate reply after a delay
     const replyDelay = Math.floor(Math.random() * 2000) + 1000;
     setTimeout(() => {
+      const replyText = generateReply(newMessage, contactType as 'roommate' | 'propertyOwner');
+      
       const replyMessage: Message = {
         id: `msg-${Date.now() + 1}`,
         sender: activeContactId,
-        text: "Thanks for your message! I'll get back to you soon.",
+        text: replyText,
         timestamp: new Date(),
         isFromCurrentUser: false
       };
+      
       setMessages(prevMessages => [...prevMessages, replyMessage]);
     }, replyDelay);
   };
@@ -154,6 +264,15 @@ const MessagingSystem = ({ isOpen, onClose, initialContactId }: MessagingSystemP
   const handleContactClick = (contactId: string) => {
     setActiveContactId(contactId);
     setShowContacts(false);
+    
+    // Update unread count
+    setContacts(prevContacts => 
+      prevContacts.map(c => 
+        c.id === contactId 
+          ? { ...c, unreadCount: 0 } 
+          : c
+      )
+    );
   };
 
   const handleBackToContacts = () => {
@@ -205,45 +324,52 @@ const MessagingSystem = ({ isOpen, onClose, initialContactId }: MessagingSystemP
               
               <ScrollArea className="flex-1 h-0">
                 <div className="divide-y divide-border">
-                  {contacts.map(contact => (
-                    <div 
-                      key={contact.id}
-                      className="flex items-center p-3 gap-3 hover:bg-accent/30 cursor-pointer transition-colors"
-                      onClick={() => handleContactClick(contact.id)}
-                    >
-                      <div className="relative">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={contact.avatar} alt={contact.name} />
-                          <AvatarFallback>
-                            <User className="h-6 w-6" />
-                          </AvatarFallback>
-                        </Avatar>
-                        {contact.online && (
-                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background"></span>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-baseline">
-                          <p className="font-medium truncate">{contact.name}</p>
-                          {contact.lastMessageTime && (
-                            <span className="text-xs text-muted-foreground">
-                              {formatContactTime(contact.lastMessageTime)}
-                            </span>
+                  {contacts.length > 0 ? (
+                    contacts.map(contact => (
+                      <div 
+                        key={contact.id}
+                        className="flex items-center p-3 gap-3 hover:bg-accent/30 cursor-pointer transition-colors"
+                        onClick={() => handleContactClick(contact.id)}
+                      >
+                        <div className="relative">
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={contact.avatar} alt={contact.name} />
+                            <AvatarFallback>
+                              <User className="h-6 w-6" />
+                            </AvatarFallback>
+                          </Avatar>
+                          {contact.online && (
+                            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background"></span>
                           )}
                         </div>
-                        {contact.lastMessage && (
-                          <p className="text-sm text-muted-foreground truncate">{contact.lastMessage}</p>
-                        )}
-                      </div>
-                      
-                      {contact.unreadCount ? (
-                        <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-xs text-white font-medium">
-                          {contact.unreadCount}
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-baseline">
+                            <p className="font-medium truncate">{contact.name}</p>
+                            {contact.lastMessageTime && (
+                              <span className="text-xs text-muted-foreground">
+                                {formatContactTime(contact.lastMessageTime)}
+                              </span>
+                            )}
+                          </div>
+                          {contact.lastMessage && (
+                            <p className="text-sm text-muted-foreground truncate">{contact.lastMessage}</p>
+                          )}
                         </div>
-                      ) : null}
+                        
+                        {contact.unreadCount ? (
+                          <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-xs text-white font-medium">
+                            {contact.unreadCount}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-muted-foreground">
+                      <p>No messages yet</p>
+                      <p className="text-sm mt-1">Save roommates or properties to start messaging</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </ScrollArea>
             </>
@@ -294,41 +420,48 @@ const MessagingSystem = ({ isOpen, onClose, initialContactId }: MessagingSystemP
               
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
-                  {messages.map(message => (
-                    <div 
-                      key={message.id} 
-                      className={`flex ${message.isFromCurrentUser ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div className="flex gap-2 max-w-[80%]">
-                        {!message.isFromCurrentUser && (
-                          <Avatar className="h-8 w-8 mt-1">
-                            <AvatarImage 
-                              src={activeContact?.avatar} 
-                              alt={activeContact?.name || 'Contact'} 
-                            />
-                            <AvatarFallback>
-                              <User className="h-4 w-4" />
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        
-                        <div>
-                          <div 
-                            className={`px-4 py-2 rounded-2xl text-sm ${
-                              message.isFromCurrentUser 
-                                ? 'bg-primary text-primary-foreground' 
-                                : 'bg-secondary text-secondary-foreground'
-                            }`}
-                          >
-                            {message.text}
+                  {messages.length > 0 ? (
+                    messages.map(message => (
+                      <div 
+                        key={message.id} 
+                        className={`flex ${message.isFromCurrentUser ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className="flex gap-2 max-w-[80%]">
+                          {!message.isFromCurrentUser && (
+                            <Avatar className="h-8 w-8 mt-1">
+                              <AvatarImage 
+                                src={activeContact?.avatar} 
+                                alt={activeContact?.name || 'Contact'} 
+                              />
+                              <AvatarFallback>
+                                <User className="h-4 w-4" />
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                          
+                          <div>
+                            <div 
+                              className={`px-4 py-2 rounded-2xl text-sm ${
+                                message.isFromCurrentUser 
+                                  ? 'bg-primary text-primary-foreground' 
+                                  : 'bg-secondary text-secondary-foreground'
+                              }`}
+                            >
+                              {message.text}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 mx-1">
+                              {formatTime(message.timestamp)}
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1 mx-1">
-                            {formatTime(message.timestamp)}
-                          </p>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-muted-foreground p-4">
+                      <p>Start a conversation</p>
+                      <p className="text-sm mt-1">Say hello to {activeContact?.name}</p>
                     </div>
-                  ))}
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
